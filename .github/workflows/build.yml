@@ -1,19 +1,30 @@
-name: Build
+name: SonarCloud Analysis
+
 on:
   push:
     branches:
-      - main
+      - '**'           # Run on all branches
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - '**'           # Run on all PRs too
+
 jobs:
   sonarqube:
-    name: SonarQube
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java (required by SonarCloud scanner)
+        uses: actions/setup-java@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: .   # Adjust if your project is in a subfolder
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
